@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# webapp.sh - install websites as desktop apps (like Omarchy's webapp installer).
+#
+#   webapp install "YouTube" youtube.com [icon-url-or-file]
+#   webapp remove  "YouTube"
+#   webapp list
+#
+# Each web app becomes a .desktop file that opens the site in a Chromium-based
+# browser's --app mode (no tabs or address bar), so launchers list it like any
+# other application.
+# Override the browser with: WEBAPP_BROWSER=brave webapp install ...
+
+set -euo pipefail
+
+APPS="$HOME/.local/share/applications"
+ICONS="$APPS/icons"
+
+usage() {
+  cat >&2 <<'EOF'
+usage:
+  webapp install "Name" url [icon-url-or-file]
+  webapp remove  "Name"
+  webapp list
+EOF
+  exit 1
+}
+
+find_browser() {
+  local b
+  for b in helium-browser helium chromium google-chrome-stable google-chrome brave brave-browser microsoft-edge-stable; do
+    if command -v "$b" >/dev/null 2>&1; then
+      command -v "$b"
+      return 0
+    fi
+  done
+  return 1
+}
+
+slugify() {
+  tr '[:upper:]' '[:lower:]' <<<"$1" | sed 's/[^a-z0-9]\+/-/g; s/^-\|-$//g'
+}
+
+refresh() {
+  command -v update-desktop-database >/dev/null 2>&1 && update-desktop-database "$APPS" 2>/dev/null || true
+}
+
+install_app() {
+  local name=${1:-} url=${2:-} icon=${3:-}
+  [[ -n $name && -n $url ]] || usage
+  [[ $url == http://* || $url == https://* ]] || url="https://$url"
+
+  local browser
+  browser=${WEBAPP_BROWSER:-$(find_browser)} || { echo "no Chromium-based browser found" >&2; exit 1; }
+
+  local slug icon_path
+  slug=$(slugify "$name")
+  mkdir -p "$APPS" "$ICONS"
+  icon_path="$ICONS/$slug.png"
+
+  # default icon: the site's favicon (this asks Google's favicon service for it)
+  if [[ -z $icon ]]; then
+    local host=${url#*://}
+    host=${host%%/*}
+    icon="https://www.google.com/s2/favicons?domain=$host&sz=128"
+  fi
+
+  if [[ -f $icon ]]; then
+    cp "$icon" "$icon_path"
+  elif ! curl -fsSL "$icon" -o "$icon_path"; then
+    echo "icon download failed, using a generic icon" >&2
+    rm -f "$icon_path"
+    icon_path="web-browser"
+  fi
+
+  cat >"$APPS/webapp-$slug.desktop" <<EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=$name
+Comment=$name (web app)
+Exec=$browser --new-window --ozone-platform=wayland --app="${url//%/%%}"
+Icon=$icon_path
+Terminal=false
+StartupNotify=true
+Categories=Network;
+EOF
+
+  refresh
+  echo "installed: $name  ->  $APPS/webapp-$slug.desktop"
+}
+
+remove_app() {
+  local name=${1:-}
+  [[ -n $name ]] || usage
+  local slug
+  slug=$(slugify "$name")
+  if [[ -f $APPS/webapp-$slug.desktop ]]; then
+    rm -f "$APPS/webapp-$slug.desktop" "$ICONS/$slug.png"
+    refresh
+    echo "removed: $name"
+  else
+    echo "no web app named '$name' (try: webapp list)" >&2
+    exit 1
+  fi
+}
+
+list_apps() {
+  local f
+  for f in "$APPS"/webapp-*.desktop; do
+    [[ -e $f ]] || { echo "no web apps installed"; return; }
+    grep -m1 '^Name=' "$f" | cut -d= -f2-
+  done
+}
+
+# machine-readable: one "Name|URL" per line, for scripts and GUIs
+list_raw() {
+  local f name url
+  for f in "$APPS"/webapp-*.desktop; do
+    [[ -e $f ]] || return
+    name=$(grep -m1 '^Name=' "$f" | cut -d= -f2-)
+    url=$(grep -m1 '^Exec=' "$f" | grep -oP '(?<=--app=")[^"]+')
+    echo "${name}|${url}"
+  done
+}
+
+case ${1:-} in
+  install)  shift; install_app "$@" ;;
+  remove)   shift; remove_app "$@" ;;
+  list)     list_apps ;;
+  list-raw) list_raw ;;
+  *)        usage ;;
+esac

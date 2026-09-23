@@ -336,6 +336,18 @@ else
     warn "support/lucid/launch-shell.sh missing, autostart will run quickshell directly"
 fi
 
+# custom scripts that back settings pages (like the Web Apps installer) live
+# in bin/, outside the shell tree, and land on the PATH so the pages can call
+# them by name alone
+if [[ -d "$SRC/bin" ]]; then
+    mkdir -p "$HOME/.local/bin"
+    for script in "$SRC"/bin/*; do
+        [[ -f "$script" ]] || continue
+        install -m755 "$script" "$HOME/.local/bin/$(basename "$script")"
+        say "  $(basename "$script") -> $HOME/.local/bin/$(basename "$script")"
+    done
+fi
+
 # state files. a re-run keeps your settings: anything already in place wins,
 # then whatever the previous install left in the backup, and only failing both
 # does the shipped default get written
