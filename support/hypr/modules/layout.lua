@@ -5,7 +5,8 @@
 hl.config({
     dwindle = {
     preserve_split = true,
-    split_width_multiplier = 2 -- lower = favors top/bottom splits more
+    force_split = 2, -- new windows always open to the right/bottom
+    split_width_multiplier = 1 -- lower = favors top/bottom splits more
 },
 })
 
