@@ -507,14 +507,6 @@ PanelWindow {
 
             var scored = dockWindow.appRows(q);
             if (q === "") {
-                var frequent = scored.filter(function(s) {
-                    return s.uses > 0;
-                }).slice(0, 5);
-                if (frequent.length > 0) {
-                    rows.push(dockWindow.headerRow("Frequent"));
-                    for (var f = 0; f < frequent.length; f++) rows.push(dockWindow.rowForApp(frequent[f].app));
-                    rows.push(dockWindow.headerRow("All applications"));
-                }
                 var rest = scored.slice().sort(function(a, b) {
                     return a.app.name.toLowerCase() < b.app.name.toLowerCase() ? -1 : 1;
                 });
