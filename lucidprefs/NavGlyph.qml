@@ -595,4 +595,28 @@ Item {
 
     }
 
+    Shape {
+        anchors.centerIn: parent
+        width: 22
+        height: 22
+        visible: glyph.kind === "webapps"
+        preferredRendererType: Shape.CurveRenderer
+
+        ShapePath {
+            strokeWidth: 0
+            fillColor: glyph.color
+
+            PathSvg {
+                path: "M12,2C6.5,2 2,6.5 2,12S6.5,22 12,22 22,17.5 22,12 17.5,2 12,2M11,19.93C7.05,19.44 4,16.08 4,12C4,11.38 4.08,10.78 4.21,10.21L9,15V16A2,2 0 0,0 11,18V19.93M17.9,17.39C17.64,16.58 16.9,16 16,16H15V13A1,1 0 0,0 14,12H8V10H10A1,1 0 0,0 11,9V7H13A2,2 0 0,0 15,5V4.59C17.93,5.77 20,8.64 20,12C20,14.08 19.2,15.97 17.9,17.39Z"
+            }
+
+        }
+
+        transform: Scale {
+            xScale: 22 / 24
+            yScale: 22 / 24
+        }
+
+    }
+
 }

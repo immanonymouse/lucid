@@ -40,6 +40,7 @@ FloatingWindow {
         { "key": "dock", "group": "Desktop", "label": "Dock", "title": "Dock", "blurb": "The dock, its icons and how it behaves", "toggle": "dockEnabled" },
         { "key": "widgets", "group": "Desktop", "label": "Widgets", "title": "Widgets", "blurb": "Cards you place on the desktop and arrange yourself", "toggle": "widgetsEnabled" },
         { "key": "workspaces", "group": "Desktop", "label": "Workspaces", "title": "Special Workspaces", "blurb": "Your music, chat, to-do list and a scratchpad, each one key away and gone again with the same key" },
+        { "key": "webapps", "group": "Desktop", "label": "Web Apps", "title": "Web Apps", "blurb": "Websites installed as their own launcher and dock entries" },
         { "key": "keybinds", "group": "Desktop", "label": "Keybinds", "title": "Keybinds", "blurb": "Every Hyprland shortcut: change one, switch it off or add your own" },
         { "key": "displays", "group": "Devices", "label": "Displays", "title": "Displays", "blurb": "Every screen this machine has: resolution, refresh rate, scale, how they are arranged and which one the shell sits on" },
         { "key": "sound", "group": "Devices", "label": "Sound", "title": "Sound", "blurb": "Which speakers play and which microphone listens, what each application is using, and how loud any of it is" },
@@ -1018,6 +1019,8 @@ FloatingWindow {
                                 return "WidgetsPage.qml";
                             case "workspaces":
                                 return "WorkspacesPage.qml";
+                            case "webapps":
+                                return "WebAppsPage.qml";
                             case "notifications":
                                 return "NotificationsPage.qml";
                             case "sound":
