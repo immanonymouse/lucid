@@ -37,7 +37,7 @@ hl.window_rule({
     name  = "float-lucid-settings",
     match = { class = "org.quickshell", title = "Lucid Settings" },
 
-    float  = true,
+    float  = false,
     size   = "1180 800",
     center = true,
 })
